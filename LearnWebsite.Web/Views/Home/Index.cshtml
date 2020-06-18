@@ -1,0 +1,60 @@
+﻿@model ICollection<Course>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@* No courses yet *@
+@if (Model.Count <= 0)
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <h3>No courses available at the moment</h3>
+        <p>Turn to this site's owners for more information</p>
+    </div>
+}
+@* Courses are available (at least a single one) *@
+else
+{
+    <h2>Latest courses</h2>
+    <div id="coursesCarousel" class="carousel slide carousel-fade" data-ride="carousel">
+        @* Navgiation buttons *@
+        <ol class="carousel-indicators">
+            <li data-target="#coursesCarousel" data-slide-to="0" class="active"></li>
+            @for (int i = 1; i < Model.Count; i++)
+            {
+                <li data-target="#coursesCarousel" data-slide-to="@i"></li>
+            }
+        </ol>
+        @* Content *@
+        <div class="carousel-inner">
+            @{
+                bool IsFirst = true; // we need a flag to set the first cours as "active"
+            }
+            @foreach (var course in Model)
+            {
+                <div class="carousel-item @(IsFirst ? "active" : "")">
+                    <img src="@course.ImageSrc" class="d-block w-100" alt="@course.DisplayName image">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>@course.DisplayName</h5>
+                        <p>@course.Description</p>
+                        <a href="/learn/@course.Id" class="text-white px-2">Go to course</a>
+                        &nbsp;
+                        <svg class="bi bi-arrow-right-square-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm5.646 10.646a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L9.793 7.5H5a.5.5 0 0 0 0 1h4.793l-2.147 2.146z" />
+                        </svg>
+                    </div>
+                </div>
+                IsFirst = false;
+            }
+        </div>
+        @* Arrows *@
+        <a class="carousel-control-prev" href="#coursesCarousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#coursesCarousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+}
