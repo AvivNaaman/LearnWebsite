@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - LearnWebsite.Web</title>
+    @* Bootstrap *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    @* SCSS Build *@
+    <link rel="stylesheet" asp-href-include="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -37,12 +39,15 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2020 - LearnWebsite.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2020 - LearnWebsite.Web - also @@<a href="https://github.com/avivnaaman/LearnWebsite">GitHub</a> - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    @* jQuery & Bootstrap *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* Custom functions and site-wide client code *@
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @* Page-specific code *@
     @RenderSection("Scripts", required: false)
 </body>
 </html>

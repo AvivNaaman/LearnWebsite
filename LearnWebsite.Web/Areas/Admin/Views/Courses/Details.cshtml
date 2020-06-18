@@ -1,0 +1,121 @@
+@model LearnWebsite.Web.Models.Entities.Course
+
+@{
+    ViewData["Title"] = "Course Details: " + Model.DisplayName;
+    Layout = "_AdminLayout";
+}
+
+<div>
+    <h4>Course</h4>
+    <hr />
+    <div>
+        <h5>Details</h5>
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.DisplayName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.DisplayName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Viewed)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Viewed)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Created)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Created)
+            </dd>
+        </dl>
+    </div>
+    <hr />
+    @* Units and pages accordion *@
+    <div>
+        <h5>Units & Pages</h5>
+        <div id="unitsAccordion">
+            @if (Model.Units.Count == 0)
+            {
+                <h6 class="text-muted">
+                    Seems like there are no units in this course.
+                    <a asp-area="admin" asp-controller="units" asp-action="create" asp-route-course="@Model.Id">
+                        Create
+                    </a>
+                    one
+                </h6>
+            }
+            else
+            {
+                for (int i = 0; i < Model.Units.Count; i++)
+                {
+                    var unit = Model.Units[i];
+                    <div class="card">
+                        @* Single card's header *@
+                        <div class="card-header" id="heading-@i">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse-@i" aria-expanded="true" aria-controls="collapse-@i">
+                                    @unit.DisplayName
+                                </button>
+                            </h5>
+                        </div>
+                        @* Unit's pages *@
+                        <div id="collapse-@i" class="collapse show" aria-labelledby="heading-@i" data-parent="#unitsAccordion">
+                            <div class="card-body">
+                                @if (unit.Pages.Count == 0)
+                                {
+                                    <h6 class="text-muted">
+                                        Seems like there are no pages in this unit.
+                                        <a asp-area="admin" asp-controller="units" asp-action="create" asp-route-course="@Model.Id" asp-route-unit="@unit.Id">
+                                            Create some content
+                                        </a>
+                                        one
+                                    </h6>
+                                }
+                                else
+                                {
+                                    <ol class="list-group">
+                                        @foreach (var pg in unit.Pages)
+                                        {
+                                            <li class="list-group-item clearfix list-group-item-action">
+                                                @pg.Title
+                                                <div class="float-right">
+                                                    <a asp-area="admin" asp-controller="pages" asp-action="edit" asp-route-id="@pg.Id" title="Edit Page">
+                                                        <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                        </svg>
+                                                    </a> 
+                                                    <a asp-area="admin" asp-controller="pages" asp-action="delete" asp-route-id="@pg.Id" title="Remove Page">
+                                                        <svg class="bi bi-trash-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z" />
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ol>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+<hr />
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id"> <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+</svg> <span class="px-2">Edit Course Details</span></a> |
+    <a asp-action="Index">Back to List</a>
+</div>

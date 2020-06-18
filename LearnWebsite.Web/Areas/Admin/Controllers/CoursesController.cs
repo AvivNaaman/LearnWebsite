@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using LearnWebsite.Web.Data;
 using LearnWebsite.Web.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using LearnWebsite.Web.Areas.Admin.Extensions;
 
 namespace LearnWebsite.Web
 {
     [Area("Admin")]
-    [Authorize(Roles = AppConstants.Roles.Admin)]
+    //[Authorize(Roles = AppConstants.Roles.Admin)]
     public class CoursesController : Controller
     {
         private readonly AppDbContext _context;
@@ -35,8 +37,9 @@ namespace LearnWebsite.Web
             {
                 return NotFound();
             }
-
+            // query course WITH units & pages
             var course = await _context.Courses
+                .Include(c => c.Units).ThenInclude(u => u.Pages)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
             {
@@ -57,10 +60,11 @@ namespace LearnWebsite.Web
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,DisplayName,Description,Viewed,Created")] Course course)
+        public async Task<IActionResult> Create([Bind("Id,DisplayName,Description,Viewed")] Course course, [FromForm] IFormFile ImageUpload)
         {
             if (ModelState.IsValid)
             {
+                course.ImageSrc = await ImageUpload?.ScaleAndConvertToBase64(); // image upload
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -89,7 +93,7 @@ namespace LearnWebsite.Web
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DisplayName,Description,Viewed,Created")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,DisplayName,Description,Viewed")] Course course, [FromForm] IFormFile ImageUpload)
         {
             if (id != course.Id)
             {
@@ -100,6 +104,7 @@ namespace LearnWebsite.Web
             {
                 try
                 {
+                    course.ImageSrc = await ImageUpload?.ScaleAndConvertToBase64(); // image upload /* TODO: Implement in view */
                     _context.Update(course);
                     await _context.SaveChangesAsync();
                 }

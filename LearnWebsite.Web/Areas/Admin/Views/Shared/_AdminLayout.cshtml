@@ -1,0 +1,19 @@
+﻿
+@{
+    ViewData["Title"] = "Admin" + ViewData["Title"];
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-md-2 col-sm-4 col-12">
+        <h4>Admin</h4>
+        <nav class="list-group">
+            <a class="list-group-item list-group-item-action" asp-area="admin" asp-controller="Home" asp-action="Index">Dashboard</a>
+            <a class="list-group-item list-group-item-action" asp-area="admin" asp-controller="courses" asp-action="Index">Course Management</a>
+        </nav>
+    </div>
+    <div class="col-md-10 col-sm-8 col-12">
+        @RenderBody()
+    </div>
+</div>
+

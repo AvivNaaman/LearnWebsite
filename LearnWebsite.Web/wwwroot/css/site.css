@@ -1,4 +1,7 @@
-﻿/*
+﻿.list-actions-cell {
+  font-size: 120%; }
+
+/*
     Color scheme, similar to aspnet core colors:
     * #40CCF4 Vivid Sky Blue
     * #0C2C65 Royal Blue Dark

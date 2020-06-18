@@ -30,6 +30,8 @@ namespace LearnWebsite.Web
             services.AddControllersWithViews()
                 .AddRazorRuntimeCompilation();
 
+            services.AddAntiforgery();
+
             // configure database & identity
             services.AddDbContext<AppDbContext>(db => db.UseSqlServer(Configuration.GetConnectionString("AppDb")));
             services.AddIdentity<AppUser, IdentityRole>(identity => { })
