@@ -13,16 +13,17 @@ namespace LearnWebsite.Web.Areas.Admin.Extensions
     {
         public static readonly List<string> AllowedImageExtensions = new List<string> { ".jpg", ".png", ".gif" };
         public const int MaxImageWidth = 1000;
-        public static async Task<string> ScaleAndConvertToBase64(this IFormFile file)
+        public static async Task<string> ScaleAndConvertToBase64(this IFormFile file, bool IncludeDataPrefix = true)
         {
             // if invalid extension, return empty string
-            if (!AllowedImageExtensions.Any(extension => extension == Path.GetExtension(file.Name)) {
+            if (!AllowedImageExtensions.Any(extension => extension == Path.GetExtension(file.FileName))) {
                 return string.Empty;
             }
             // check if scale required:
             using (MemoryStream ms = new MemoryStream())
             {
                 await file.CopyToAsync(ms);
+                ms.Position = 0;
                 using (Image img = Image.Load(ms))
                 {
                     int width = img.Width;
@@ -32,8 +33,15 @@ namespace LearnWebsite.Web.Areas.Admin.Extensions
                         width = MaxImageWidth;
                         img.Mutate(i => i.Resize(width, 0));
                     }
+                    await ms.FlushAsync();
+                    ms.Position = 0;
                     img.SaveAsJpeg(ms);
-                    return Convert.ToBase64String(ms.ToArray());
+                    var b64 = Convert.ToBase64String(ms.ToArray());
+                    if (IncludeDataPrefix)
+                    {
+                        b64 = "data:img/jpg;base64," + b64;
+                    }
+                    return b64;
                 }
             }
         }

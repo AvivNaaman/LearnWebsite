@@ -7,72 +7,69 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LearnWebsite.Web.Data;
 using LearnWebsite.Web.Models.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using LearnWebsite.Web.Areas.Admin.Extensions;
 
-namespace LearnWebsite.Web
+namespace LearnWebsite.Web.areas_Admin_
 {
-    [Area("Admin")]
-    //[Authorize(Roles = AppConstants.Roles.Admin)]
-    public class CoursesController : Controller
+    public class PagesController : Controller
     {
         private readonly AppDbContext _context;
 
-        public CoursesController(AppDbContext context)
+        public PagesController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Course
+        // GET: Pages
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Courses.ToListAsync());
+            var appDbContext = _context.Pages.Include(c => c.Unit);
+            return View(await appDbContext.ToListAsync());
         }
 
-        // GET: Course/Details/5
+        // GET: Pages/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            // query course WITH units & pages
-            var course = await _context.Courses
-                .Include(c => c.Units).ThenInclude(u => u.Pages)
+
+            var coursePage = await _context.Pages
+                .Include(c => c.Unit)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (course == null)
+            if (coursePage == null)
             {
                 return NotFound();
             }
 
-            return View(course);
+            return View(coursePage);
         }
 
-        // GET: Course/Create
+        // GET: Pages/Create
         public IActionResult Create()
         {
+            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id");
             return View();
         }
 
-        // POST: Course/Create
+        // POST: Pages/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,DisplayName,Description,Viewed")] Course course, [FromForm] IFormFile ImageUpload)
+        public async Task<IActionResult> Create([Bind("Id,Title,HtmlContent,UnitId")] CoursePage coursePage)
         {
             if (ModelState.IsValid)
             {
-                course.ImageSrc = await ImageUpload?.ScaleAndConvertToBase64(); // image upload
-                _context.Add(course);
+                _context.Add(coursePage);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(course);
+            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
+            return View(coursePage);
         }
 
-        // GET: Course/Edit/5
+        // GET: Pages/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,22 +77,23 @@ namespace LearnWebsite.Web
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
-            if (course == null)
+            var coursePage = await _context.Pages.FindAsync(id);
+            if (coursePage == null)
             {
                 return NotFound();
             }
-            return View(course);
+            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
+            return View(coursePage);
         }
 
-        // POST: Course/Edit/5
+        // POST: Pages/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Course course, [FromForm(Name = "ImageUpload")] IFormFile ImageUpload)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,HtmlContent,UnitId")] CoursePage coursePage)
         {
-            if (id != course.Id)
+            if (id != coursePage.Id)
             {
                 return NotFound();
             }
@@ -104,13 +102,12 @@ namespace LearnWebsite.Web
             {
                 try
                 {
-                    course.ImageSrc = await ImageUpload?.ScaleAndConvertToBase64(); // image upload /* TODO: Implement in view */
-                    _context.Update(course);
+                    _context.Update(coursePage);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CourseExists(course.Id))
+                    if (!CoursePageExists(coursePage.Id))
                     {
                         return NotFound();
                     }
@@ -121,10 +118,11 @@ namespace LearnWebsite.Web
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(course);
+            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
+            return View(coursePage);
         }
 
-        // GET: Course/Delete/5
+        // GET: Pages/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -132,30 +130,31 @@ namespace LearnWebsite.Web
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            var coursePage = await _context.Pages
+                .Include(c => c.Unit)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (course == null)
+            if (coursePage == null)
             {
                 return NotFound();
             }
 
-            return View(course);
+            return View(coursePage);
         }
 
-        // POST: Course/Delete/5
+        // POST: Pages/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
-            _context.Courses.Remove(course);
+            var coursePage = await _context.Pages.FindAsync(id);
+            _context.Pages.Remove(coursePage);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CourseExists(int id)
+        private bool CoursePageExists(int id)
         {
-            return _context.Courses.Any(e => e.Id == id);
+            return _context.Pages.Any(e => e.Id == id);
         }
     }
 }
