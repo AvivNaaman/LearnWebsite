@@ -37,6 +37,13 @@ namespace LearnWebsite.Web
             services.AddIdentity<AppUser, IdentityRole>(identity => { })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+            services.ConfigureApplicationCookie(cookie =>
+            {
+                cookie.LoginPath = "/account/login";
+                cookie.LogoutPath = "/account/logout";
+                cookie.Cookie.MaxAge = TimeSpan.FromDays(7);
+                cookie.SlidingExpiration = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,7 +55,8 @@ namespace LearnWebsite.Web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -57,6 +65,7 @@ namespace LearnWebsite.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

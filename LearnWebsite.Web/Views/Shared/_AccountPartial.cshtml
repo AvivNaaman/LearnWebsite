@@ -1,0 +1,49 @@
+﻿@* Should align to right *@
+@inject Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager
+    <ul class="navbar-nav ml-auto flex-nowrap">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    @User.Identity.Name
+                </a>
+                @* Dropdown links - Profile and Logout *@
+                <div class="dropdown-menu" aria-labelledby="accountDropdown">
+                    <a class="dropdown-item" asp-area="" asp-controller="account" asp-action="index">
+                        <svg class="bi bi-person-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z" />
+                            <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                            <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z" />
+                        </svg> Profile
+                    </a>
+                    <a class="dropdown-item" asp-area="" asp-controller="account" asp-action="logout">
+                        <svg class="bi bi-lock-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="11" height="9" x="2.5" y="7" rx="2" />
+                            <path fill-rule="evenodd" d="M4.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                        </svg> Logout
+                    </a>
+                    @* Seperator + Admin area link *@
+                    @if (true || User.IsInRole(AppConstants.Roles.Admin))
+                    {
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" asp-area="admin" asp-controller="home" asp-action="index">
+                            <svg class="bi bi-graph-up" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 0h1v16H0V0zm1 15h15v1H1v-1z" />
+                                <path fill-rule="evenodd" d="M14.39 4.312L10.041 9.75 7 6.707l-3.646 3.647-.708-.708L7 5.293 9.959 8.25l3.65-4.563.781.624z" />
+                                <path fill-rule="evenodd" d="M10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4h-3.5a.5.5 0 0 1-.5-.5z" />
+                            </svg> Admin
+                        </a>
+                    }
+                </div>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item px-0 px-md-1">
+                <a class="btn btn-outline-info" asp-area="" asp-controller="account" asp-action="login">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-controller="account" asp-action="register">Register</a>
+            </li>
+        }
+    </ul>

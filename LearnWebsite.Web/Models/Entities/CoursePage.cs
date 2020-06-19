@@ -34,5 +34,7 @@ namespace LearnWebsite.Web.Models.Entities
         /// The unit which contains the page
         /// </summary>
         public CourseUnit Unit { get; set; }
+        public int InUnitOrder { get; set; }
+        public string UrlName { get; set; }
     }
 }

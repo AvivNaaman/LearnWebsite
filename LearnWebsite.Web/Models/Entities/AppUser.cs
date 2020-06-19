@@ -12,5 +12,14 @@ namespace LearnWebsite.Web.Models.Entities
     /// </summary>
     public class AppUser : IdentityUser
     {
+        public AppUser() : base()
+        {
+
+        }
+
+        public AppUser(string username, string email) : base(username)
+        {
+            Email = email;
+        }
     }
 }

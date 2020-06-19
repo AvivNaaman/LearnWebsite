@@ -1,0 +1,47 @@
+﻿@model LearnWebsite.Web.Models.ViewModels.LoginViewModel
+@inject Microsoft.AspNetCore.Identity.SignInManager<AppUser> signInManager
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2>Login</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-6 col-sm-12 border-right">
+        <div class="col-md-8">
+            <h2>Using password</h2>
+            <form asp-action="login">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="UserNameOrEmail" class="control-label"></label>
+                    <input asp-for="UserNameOrEmail" class="form-control" />
+                    <span asp-validation-for="UserNameOrEmail" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Login" class="btn btn-primary" />
+                    <a class="btn btn-outline-secondary" asp-controller="account" asp-area="" asp-action="register">Register instead</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if ((await signInManager.GetExternalAuthenticationSchemesAsync()).Count() > 0)
+    {
+        <div class="col-md-6 col-sm-12">
+            <div class="col-md-8">
+                <hr class="d-md-none" />
+                <h2>Using external account</h2>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

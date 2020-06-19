@@ -8,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using LearnWebsite.Web.Data;
 using LearnWebsite.Web.Models.Entities;
 
-namespace LearnWebsite.Web.areas_Admin_
+namespace LearnWebsite.Web.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    //[Authorize(Roles = AppConstants.Roles.Admin)]
     public class PagesController : Controller
     {
         private readonly AppDbContext _context;

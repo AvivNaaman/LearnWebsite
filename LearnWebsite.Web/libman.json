@@ -5,6 +5,10 @@
     {
       "library": "tinymce@5.3.2",
       "destination": "wwwroot/lib/tinymce/dist"
+    },
+    {
+      "library": "Sortable@1.10.2",
+      "destination": "wwwroot/lib/Sortable/dist"
     }
   ]
 }

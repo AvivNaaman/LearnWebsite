@@ -7,8 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LearnWebsite.Web.Areas.Admin.Extensions
-{
+namespace LearnWebsite.Web.Extnsions {
     public static class IFormFileExtensions
     {
         public static readonly List<string> AllowedImageExtensions = new List<string> { ".jpg", ".png", ".gif" };

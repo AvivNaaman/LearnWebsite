@@ -6,9 +6,10 @@
 }
 <h4>Course</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
+<form asp-action="Edit" enctype="multipart/form-data" onsubmit="editFormSubmitted">
+    <div class="row">
+        <div class="col-md-4">
+            <h5>Edit Course Details</h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
@@ -23,17 +24,181 @@
             </div>
             <div class="form-group">
                 <label asp-for="ImageSrc" class="control-label"></label>
-                <img src="@Model.ImageSrc" class="w-100"/>
+                <img src="@Model.ImageSrc" class="w-100" />
                 <input type="file" name="ImageUpload" class="form-control" formenctype="multipart/form-data" />
                 <span asp-validation-for="ImageSrc" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
-        </form>
+        </div>
+        <div>
+            <h5>Edit Units & Pages</h5>
+            @* Units and pages accordion *@
+            <div>
+                <h5>Units & Pages</h5>
+                <div id="unitsAccordion">
+                    @if (Model.Units.Count == 0)
+                    {
+                        <h6 class="text-muted">
+                            Seems like there are no units in this course yet.
+                            <a asp-area="admin" asp-controller="units" asp-action="create" asp-route-course="@Model.Id">
+                                Create
+                            </a>
+                            one
+                        </h6>
+                    }
+                    else
+                    {
+                        bool isFirst = true;
+                        foreach (var unit in Model.Units)
+                        {
+                            <div class="card w-100">
+                                @* Single card's header *@
+                                <div class="card-header" id="heading-@unit.Id">
+                                    <h5 class="mb-0">
+                                        @* Make sure no submission is accidentally done! *@
+                                        <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse-@unit.Id" aria-expanded="true" aria-controls="collapse-@unit.Id">
+                                            @unit.DisplayName
+                                        </button>
+                                    </h5>
+                                </div>
+                                @* Unit's pages *@
+                                <div id="collapse-@unit.Id" class="collapse @(isFirst ? "show":"")" aria-labelledby="heading-@unit.Id" data-parent="#unitsAccordion">
+                                    <div class="card-body">
+                                        @* Show error if there are no pages *@
+                                        @if (unit.Pages.Count == 0)
+                                        {
+                                            <h6 class="text-muted">
+                                                Seems like there are no pages in this unit.
+                                                <a asp-area="admin" asp-controller="units" asp-action="create" asp-route-course="@Model.Id" asp-route-unit="@unit.Id">
+                                                    Create some content
+                                                </a>
+                                                one
+                                            </h6>
+                                        }
+                                        else
+                                        {
+                                            <ol class="list-group" id="editlistgroup@(unit.Id)">
+                                                @foreach (var pg in unit.Pages)
+                                                {
+                                                    <li class="list-group-item clearfix list-group-item-action">
+                                                        @pg.Title
+                                                        <div class="float-right">
+                                                            <a asp-area="admin" asp-controller="pages" asp-action="edit" asp-route-id="@pg.Id" title="Edit Page">
+                                                                <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                                </svg>
+                                                            </a>
+                                                            <a asp-area="admin" asp-controller="pages" asp-action="delete" asp-route-id="@pg.Id" title="Remove Page">
+                                                                <svg class="bi bi-trash-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ol>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+    @* This input will contain a seriallization of the pages and units ids, and will be posted to the server, where it will be desiriallized and validated. *@
+    <input name="UnitsPagesOrder" id="UnitsPagesOrder" />
+</form>
 
 <div>
     <a asp-action="Index">Back to courses List</a>
 </div>
+
+@section Scripts {
+    <script src="~/lib/Sortable/dist/Sortable.min.js"></script>
+    <script>
+        /*
+         * Don't worry, that's done using a server side loop!
+         */
+        /* TODO: Doesn't necessarily swap - maybe just remove and insert! */
+        var orderArray = [];
+        @* Make units sortable *@
+        function unitsOrderChanged(e) {
+            if (e.oldIndex != e.newIndex) {
+                setPreventLeavingState(true); // prevent leaving the site
+                console.log(e.oldIndex + " -> " + e.newIndex);
+                // swap
+                var item = orderArray[e.oldIndex]; // get item to move
+                orderArray.splice(e.oldIndex, 1); // remove from old index
+                orderArray.splice(e.newIndex, 0, item); // add at new index
+                serializeOrderArray();
+            }
+        }
+        Sortable.create(unitsAccordion, {
+            animation: 100,
+            group: 'unitslist',
+            draggable: '.card',
+            handle: '.card',
+            onEnd: unitsOrderChanged
+        });
+
+        @* Make pages inside units sortable *@
+        /**
+         * Event handler for page order changed
+         * @@param e The event
+         * @@param unitOrderArray The array which holds the unit's order
+         */
+        function pageOrderChanged(e, unitOrderArray) {
+            if (e.oldIndex != e.newIndex) {
+                setPreventLeavingState(true); // prevent leaving the site
+                console.log(e.oldIndex + " -> " + e.newIndex);
+                // swap
+                var item = unitOrderArray[e.oldIndex]; // get item to move
+                unitOrderArray.splice(e.oldIndex, 1); // remove from old index
+                unitOrderArray.splice(e.newIndex, 0, item); // add at new index
+                serializeOrderArray();
+            }
+        }
+        @foreach (var unit in Model.Units)
+        {
+            <text>
+        var currUnitPagesArray@(unit.Id) = [];</text>
+            foreach (var page in unit.Pages)
+            {
+                <text>
+        currUnitPagesArray@(unit.Id).push(@(page.Id));
+
+        </text>
+            }
+            <text>
+        // add to main array id of unit + array of values
+        orderArray.push({ id: @(unit.Id), values: currUnitPagesArray@(unit.Id)});
+            Sortable.create(editlistgroup@(unit.Id), {
+                animation: 100,
+                group: 'unit@(unit.Id)pageslist',
+                draggable: '.list-group-item',
+                handle: '.list-group-item',
+                chosenClass: 'active',
+                onEnd: function (e) { pageOrderChanged(e, currUnitPagesArray@(unit.Id));}
+            });
+    </text>
+        }
+
+        function editFormSubmitted(e) {
+            setPreventLeavingState(false); // disable prevent leaving the site
+        }
+
+        /**
+         * Serializes a 2-d number array and puts it in the text box
+         * @@param arr {Array} The array to serialize
+         */
+        function serializeOrderArray() {
+            $("#UnitsPagesOrder").val(JSON.stringify(orderArray));
+        }
+
+    </script>
+}

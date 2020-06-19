@@ -31,5 +31,7 @@ namespace LearnWebsite.Web.Models.Entities
         /// </summary>
         public string DisplayName { get; set; }
         public List<CoursePage> Pages { get; internal set; }
+        public int InCourseOrder { get; set; }
+        public string UrlName { get; set; }
     }
 }
