@@ -39,8 +39,9 @@ namespace LearnWebsite.Web
                 .AddDefaultTokenProviders();
             services.ConfigureApplicationCookie(cookie =>
             {
-                cookie.LoginPath = "/account/login";
-                cookie.LogoutPath = "/account/logout";
+                cookie.LoginPath = "/Account/Login";
+                cookie.LogoutPath = "/Account/Logout";
+                cookie.AccessDeniedPath = "/Error/403";
                 cookie.Cookie.MaxAge = TimeSpan.FromDays(7);
                 cookie.SlidingExpiration = true;
             });
