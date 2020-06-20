@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LearnWebsite.Web.Data;
 using LearnWebsite.Web.Models.Entities;
+using LearnWebsite.Web.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,6 +38,9 @@ namespace LearnWebsite.Web
             services.AddIdentity<AppUser, IdentityRole>(identity => { })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddSingleton<IEmailService, EmailService>(); // add email service
+
             services.ConfigureApplicationCookie(cookie =>
             {
                 cookie.LoginPath = "/Account/Login";

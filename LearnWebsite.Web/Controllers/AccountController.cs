@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using LearnWebsite.Web.Extensions;
 using LearnWebsite.Web.Models.Entities;
 using LearnWebsite.Web.Models.ViewModels;
+using LearnWebsite.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace LearnWebsite.Web.Controllers
@@ -16,12 +20,14 @@ namespace LearnWebsite.Web.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
         public AccountController(UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
+            SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -133,6 +139,57 @@ namespace LearnWebsite.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword() =>View();
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var u = await _userManager.FindByEmailAsync(email);
+            if (u != null)
+            {
+                // generate token, link & send email
+                var token = await _userManager.GeneratePasswordResetTokenAsync(u);
+                var link = u.GeneratePasswordResetEmailByToken(Url.ActionLink("ResetPassword", "Account", new { token, email = u.Email }));
+                await _emailService.SendEmailAsync(u.NormalizedEmail, "Password Reset Email", link);
+            }
+            return View("ForgotPasswordEmailSent");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(string token, string email)
+        {
+            var u = await _userManager.FindByEmailAsync(WebUtility.UrlDecode(email));
+            if (u == null) return NotFound();
+            token = WebUtility.UrlDecode(token);
+            if (!await _userManager.VerifyUserTokenAsync(u, _userManager.Options.Tokens.PasswordResetTokenProvider, "ResetPassword", token)) {
+                return NotFound();
+            }
+            return View(new FinishResetPasswordViewModel() { Token = token, Email = email });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(FinishResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var u = await _userManager.FindByEmailAsync(model.Email);
+                if (u == null) return NotFound();
+                var res = await _userManager.ResetPasswordAsync(u, model.Token, model.NewPassword);
+                if (res.Succeeded) return RedirectToAction("Index", "Action", new { reset = true });
+                foreach (var error in res.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+            return View(model);
         }
     }
 }
