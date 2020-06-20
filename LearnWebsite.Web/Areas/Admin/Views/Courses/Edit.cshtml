@@ -1,4 +1,4 @@
-@model LearnWebsite.Web.Models.Entities.Course
+@model Course
 
 @{
     ViewData["Title"] = "Edit Course: " + Model.DisplayName;
@@ -8,7 +8,7 @@
 <hr />
 <form asp-action="Edit" enctype="multipart/form-data" onsubmit="editFormSubmitted">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 col-12">
             <h5>Edit Course Details</h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
@@ -29,12 +29,17 @@
                 <span asp-validation-for="ImageSrc" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <label asp-for="UrlName" class="control-label"></label>
+                <input asp-for="UrlName" class="form-control" />
+                <span asp-validation-for="UrlName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button" id="saveButton" value="Save" class="btn btn-primary" onclick="saveButtonClick" />
             </div>
         </div>
-        <div>
+        <div class="col-md-8 col-12">
             <h5>Edit Units & Pages</h5>
-            @* Units and pages accordion *@
+            <h6 class="text-muted">Drag and drop to reorder, for both outer order of units and inner order of pages.</h6>
             <div>
                 <h5>Units & Pages</h5>
                 <div id="unitsAccordion">
@@ -111,7 +116,7 @@
         </div>
     </div>
     @* This input will contain a seriallization of the pages and units ids, and will be posted to the server, where it will be desiriallized and validated. *@
-    <input name="UnitsPagesOrder" id="UnitsPagesOrder" />
+    <input type="hidden" name="UnitsPagesOrder" id="UnitsPagesOrder" />
 </form>
 
 <div>
@@ -119,6 +124,7 @@
 </div>
 
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/lib/Sortable/dist/Sortable.min.js"></script>
     <script>
         /*
@@ -200,5 +206,10 @@
             $("#UnitsPagesOrder").val(JSON.stringify(orderArray));
         }
 
+        // submit form, witout asking user ahether its OK to leave page
+        $('#saveButton').click(function () {
+            setPreventLeavingState(false);
+            document.forms[0].submit();
+        });
     </script>
 }

@@ -80,12 +80,6 @@ namespace LearnWebsite.Web
                     name: "Admin",
                     areaName: "Admin",
                     pattern: "admin/{controller=Home}/{action=Index}/{id?}");
-                // Add /learn/{CourseId}/{PageId?} route
-                endpoints.MapControllerRoute(
-                    name: "learn",
-                    pattern: "learn/{course?}/{page?}",
-                    new { controller = "Learn", action = "Index" }
-                    );
                 // Add default controllers
                 endpoints.MapControllerRoute(
                     name: "default",

@@ -10,22 +10,27 @@
 <h4>CoursePage</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-11">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group col-md-5">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="HtmlContent" class="control-label"></label>
-                <input asp-for="HtmlContent" class="form-control" />
-                <span asp-validation-for="HtmlContent" class="text-danger"></span>
+            <div class="form-group col-md-5">
+                <label class="control-label"></label>
+                <select class="form-control" asp-items="ViewBag.Courses" id="selectCourse"></select>
+            </div>
+            <div class="form-group col-md-5">
+                <label asp-for="UnitId" class="control-label"></label>
+                <select asp-for="UnitId" class="form-control" asp-items="ViewBag.UnitId"></select>
+                <span asp-validation-for="UnitId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UnitId" class="control-label"></label>
-                <select asp-for="UnitId" class ="form-control" asp-items="ViewBag.UnitId"></select>
+                <label asp-for="HtmlContent" class="control-label"></label>
+                <textarea asp-for="HtmlContent" class="form-control" id="pageContentTextArea"></textarea>
+                <span asp-validation-for="HtmlContent" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -38,3 +43,19 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{await Html.RenderPartialAsync("_TinyMCEScriptsPartial");}
+    <script>
+        $("#pageContentTextArea").tinymce({
+            height: 500,
+            plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
+            menubar: 'file edit view insert format tools table help',
+            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            toolbar_sticky: true,
+            height: 600,
+            image_caption: true,
+            toolbar_mode: 'sliding',
+        });
+    </script>
+}

@@ -30,10 +30,7 @@ namespace LearnWebsite.Web.Controllers
             _emailService = emailService;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public async Task<IActionResult> Index() => View(await _userManager.FindByNameAsync(User.Identity.Name));
 
         [AllowAnonymous]
         [HttpGet]

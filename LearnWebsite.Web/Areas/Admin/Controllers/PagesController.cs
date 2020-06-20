@@ -50,7 +50,7 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
         // GET: Pages/Create
         public IActionResult Create()
         {
-            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id");
+            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "DisplayName");
             return View();
         }
 
@@ -67,7 +67,7 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
+            ViewData["UnitId"] = new SelectList(_context.Courses, "Id", "DisplayName", coursePage.Unit.CourseId);
             return View(coursePage);
         }
 

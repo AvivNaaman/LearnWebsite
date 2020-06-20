@@ -1,7 +1,4 @@
-﻿.list-actions-cell {
-  font-size: 120%; }
-
-/*
+﻿/*
     Color scheme, similar to aspnet core colors:
     * #40CCF4 Vivid Sky Blue
     * #0C2C65 Royal Blue Dark
@@ -9,6 +6,14 @@
     * #E2DADB Gainsboro
     * #FFE74C Minion Yellow
 */
+.list-actions-cell {
+  font-size: 120%; }
+
+.carousel-inner {
+  max-height: 75vh; }
+  .carousel-inner img {
+    max-height: 75vh; }
+
 a {
   color: #0366d6; }
   a .navbar-brand {

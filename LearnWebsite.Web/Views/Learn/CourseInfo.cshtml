@@ -1,0 +1,74 @@
+﻿@model LearnWebsite.Web.Models.Entities.Course
+
+@{
+    ViewData["Title"] = "Course Info: " + Model.DisplayName;
+}
+
+<h2>@Model.DisplayName</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Viewed)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Viewed)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Created)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+        @* TODO: Show image *@
+        @* TODO: Share Course via whatsapp, facebook, etc. *@
+    </dl>
+    <div>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a class="btn btn-primary float-right" asp-route="LearnRoute" asp-all-route-data="@(new Dictionary<string, string>() { {"course", Model.UrlName} })">
+                Start learning
+            </a>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#suggestLoginModal">
+                Start Learning
+            </button>
+        }
+    </div>
+</div>
+@if (!User.Identity.IsAuthenticated)
+{
+    @* Show modal if user is not logged in *@
+
+    <div class="modal fade" id="suggestLoginModal" tabindex="-1" role="dialog" aria-labelledby="suggestLoginModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="suggestLoginModalLabel">Start course</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="text-muted">Would you like to log in, which will save your progress in the course?</h6>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-outline-secondary" asp-route="LearnRoute" asp-all-route-data="@(new Dictionary<string, string>() { {"course", Model.UrlName} })">
+                        Skip logging in
+                    </a>
+                    <a class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path.Value">
+                        Log in or Join
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

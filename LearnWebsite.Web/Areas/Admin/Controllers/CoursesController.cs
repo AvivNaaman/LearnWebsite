@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using SixLabors.ImageSharp;
 using LearnWebsite.Web.Extnsions;
 using LearnWebsite.Web.Extensions;
+using System.Text.RegularExpressions;
 
 namespace LearnWebsite.Web.Areas.Admin.Controllers
 {
@@ -71,6 +72,17 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 {
                     course.ImageSrc = await ImageUpload?.ScaleAndConvertToBase64(); // image upload
                 }
+                // url address
+                if (String.IsNullOrEmpty(course.UrlName))
+                {
+                    // leave all
+                    course.UrlName = FormatNameAsString(course.DisplayName);
+                    if (course.UrlName.Length < 4) // error if too small
+                    {
+                        ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
+                        return View(course);
+                    }
+                }
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -117,35 +129,23 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 try
                 {
                     // handle order changing
-                    if (!String.IsNullOrEmpty(course.UnitsPagesOrder))
-                    {
-                        var orderedUnits = JsonConvert.DeserializeObject<List<OrderedUnit>>(course.UnitsPagesOrder);
-                        var units = (await _context.Units.Include(c => c.Pages).Where(c => c.CourseId == id).ToListAsync());
-                        // iterate over units order
-                        for (int i = 0; i < orderedUnits.Count; i++)
-                        {
-                            // set order of unit: find it and assign the new
-                            var orderedUnit = orderedUnits[i];
-                            var u = units.FirstOrDefault(u => u.Id == orderedUnit.id);
-                            if (u == null) throw new Exception("Someone tried to reorder unit that doesn't exist any more!");
-                            u.InCourseOrder = i;
-                            _context.Update(u); // update unit
-                            // set order of pages in unit
-                            for (int j = 0; j < orderedUnit.Values.Count; j++)
-                            {
-                                var p = u.Pages.FirstOrDefault(p => p.Id == orderedUnit.Values[j]);
-                                if (p == null) throw new Exception("Someone tried to reorder page that doesn't exist.");
-                                p.InUnitOrder = j; // set order
-                                _context.Update(p); // update
-                            }
-                        }
-                    }
+                    await UpdateOrder(course);
                     // handle new image upload
                     if (course.ImageUpload != null)
                     {
                         course.ImageSrc = await course.ImageUpload?.ScaleAndConvertToBase64(); // image upload /* TODO: Implement in view */
                     }
-                    // handle other details
+                    // url address
+                    if (String.IsNullOrEmpty(course.UrlName))
+                    {
+                        // leave all
+                        course.UrlName = FormatNameAsString(course.DisplayName);
+                        if (course.UrlName.Length < 4) // error if too small
+                        {
+                            ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
+                            return View(course);
+                        }
+                    }
                     _context.Update((Course)course); // cast to remove all the extra fields
                     await _context.SaveChangesAsync();
                 }
@@ -162,6 +162,7 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            course.Units = await _context.Units.Include(u => u.Pages).Where(u => u.CourseId == id).ToListAsync();
             return View(course);
         }
 
@@ -210,5 +211,34 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 .Include(c => c.Units).ThenInclude(u => u.Pages)
                 .FirstOrDefaultAsync(m => m.Id == id)).SortUnitsAndPages();
         }
+
+        private async Task UpdateOrder(EditCourseViewModel course)
+        {
+            if (!String.IsNullOrEmpty(course.UnitsPagesOrder))
+            {
+                var orderedUnits = JsonConvert.DeserializeObject<List<OrderedUnit>>(course.UnitsPagesOrder);
+                var units = (await _context.Units.Include(c => c.Pages).Where(c => c.CourseId == course.Id).ToListAsync());
+                // iterate over units order
+                for (int i = 0; i < orderedUnits.Count; i++)
+                {
+                    // set order of unit: find it and assign the new
+                    var orderedUnit = orderedUnits[i];
+                    var u = units.FirstOrDefault(u => u.Id == orderedUnit.id);
+                    if (u == null) throw new Exception("Someone tried to reorder unit that doesn't exist any more!");
+                    u.InCourseOrder = i;
+                    _context.Update(u); // update unit
+                                        // set order of pages in unit
+                    for (int j = 0; j < orderedUnit.Values.Count; j++)
+                    {
+                        var p = u.Pages.FirstOrDefault(p => p.Id == orderedUnit.Values[j]);
+                        if (p == null) throw new Exception("Someone tried to reorder page that doesn't exist.");
+                        p.InUnitOrder = j; // set order
+                        _context.Update(p); // update
+                    }
+                }
+            }
+        }
+
+        private string FormatNameAsString(string name) => Regex.Replace(name, @"[^\w\d-_]", "", RegexOptions.None, TimeSpan.FromSeconds(1.5));
     }
 }

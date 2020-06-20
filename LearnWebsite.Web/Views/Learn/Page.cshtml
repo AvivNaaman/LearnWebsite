@@ -1,0 +1,64 @@
+﻿@model CoursePage
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+@* Breadcrumb: <Course>/<Unit>/<Page Title> (Order) *@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">@Model.Unit.Course.DisplayName</li>
+        <li class="breadcrumb-item">@Model.Unit.DisplayName</li>
+        <li class="breadcrumb-item active">@Model.Title (@(Model.InUnitOrder+1))</li>
+    </ol>
+</nav>
+<div class="row">
+    @* Side Nav Menu *@
+    <div class="col-md-3" data-labeledby="#toggleSidebarBtn">
+        <div class="accordion sticky-top pt-2" id="navAcc">
+            @foreach (var unit in Model.Unit.Course.Units)
+            {
+                <div class="card">
+                    <div class="card-header" id="heading@(unit.Id)">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse@(unit.Id)" aria-expanded="true" aria-controls="collapse@(unit.Id)">
+                                @unit.DisplayName
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="collapse@(unit.Id)" class="collapse @(unit == Model.Unit ? "show": "")" aria-labelledby="heading@(unit.Id)" data-parent="#navAcc">
+                        <div class="card-body">
+                            @* TODO: Add page nav links *@
+                            <ol class="list-group">
+                                @foreach (var p in unit.Pages)
+                                {
+                                    <li class="list-group-item list-group-item-action @(p == Model ? "active":"")">
+                                        @if (p != Model)
+                                        {
+                                            <a class="@(p == Model ? "" : "disabled")" asp-route="LearnRoute"
+                                               asp-all-route-data="@(new Dictionary<string, string> { { "course", p.Unit.Course.UrlName }, { "unit", p.Unit.UrlName }, { "page", p.UrlName } })">
+                                                @(p.Title)
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            @p.Title
+                                        }
+                                    </li>
+                                }
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-9">
+
+        <h2>@Model.Title</h2>
+        <article>
+            @Html.Raw(Model.HtmlContent)
+        </article>
+
+    </div>
+</div>

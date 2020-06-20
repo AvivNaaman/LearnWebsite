@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,17 +15,18 @@ namespace LearnWebsite.Web.Models.Entities
         /// The primary key of the page
         /// </summary>
         public int Id { get; set; }
-
+        [Required]
+        [StringLength(70, MinimumLength = 2)]
         /// <summary>
         /// The title of the page
         /// </summary>
         public string Title { get; set; }
-
+        [Display(Name = "Page content")]
         /// <summary>
         /// The content of the page, as HTML
         /// </summary>
         public string HtmlContent { get; set; }
-
+        [Required]
         /// <summary>
         /// The primary key of the page's unit
         /// </summary>

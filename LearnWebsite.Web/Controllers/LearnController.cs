@@ -18,15 +18,17 @@ namespace LearnWebsite.Web.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index(string course, string unit, string page)
+        [HttpGet]
+        [Route("Learn/{course}/{unit?}/{page?}", Name = "LearnRoute")]
+        public async Task<IActionResult> Learn(string course, string unit, string page)
         {
             // redirect to home page if course is not specified
             if (String.IsNullOrWhiteSpace(course)) return RedirectToAction("Index", "Home");
             var p = await GetPage(course, unit, page);
             if (p == null) return NotFound();
-            return View(p);
+            return View("Page", p);
         }
-
+        [NonAction]
         private async Task<CoursePage> GetPage(string course, string unit, string page)
         {
             if (String.IsNullOrWhiteSpace(course)) return null;
@@ -45,6 +47,15 @@ namespace LearnWebsite.Web.Controllers
             if (String.IsNullOrWhiteSpace(page)) return u.Pages.ElementAt(0);
 
             return u.Pages.FirstOrDefault(p => p.UrlName == page);
+        }
+        [Route("Course/{course}", Name = "CourseInfo")]
+        [HttpGet]
+        public async Task<IActionResult> CourseInfo(string course) // id = course url name
+        {
+            // display course details if unit is not specified
+            var c = await _context.Courses.Include(c => c.Units).FirstOrDefaultAsync(c => c.UrlName == course);
+            if (c == null) return NotFound();
+            return View(c);
         }
     }
 }

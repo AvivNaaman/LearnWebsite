@@ -1,4 +1,31 @@
-﻿@import 'theme.scss', 'colors.scss';
+﻿/*
+    Color scheme, similar to aspnet core colors:
+    * #40CCF4 Vivid Sky Blue
+    * #0C2C65 Royal Blue Dark
+    * #632176 Midnight
+    * #E2DADB Gainsboro
+    * #FFE74C Minion Yellow
+*/
+
+$app-sky-blue: #40CCF4 !default;
+$app-royal-blue: #0C2C65 !default;
+$app-purple-midnight: #632176 !default;
+$app-gray-gainsboro: #E2DADB !default;
+$app-minion-yellow: #FFE74C !default;
+
+
+.list-actions-cell {
+    font-size: 120%;
+}
+
+.carousel-inner {
+    max-height: 75vh;
+
+    img {
+        max-height: 75vh;
+    }
+}
+
 a {
     color: #0366d6;
 
