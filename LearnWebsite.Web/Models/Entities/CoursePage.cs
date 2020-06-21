@@ -37,6 +37,9 @@ namespace LearnWebsite.Web.Models.Entities
         /// </summary>
         public CourseUnit Unit { get; set; }
         public int InUnitOrder { get; set; }
+        [StringLength(40, MinimumLength = 0)]
+        [Display(Name = "(optional) The name of the course in the address bar. Auto-generated if not specified.")]
+        [RegularExpression(@"^([\w\d-_])*$", ErrorMessage = "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.")]
         public string UrlName { get; set; }
     }
 }

@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 namespace LearnWebsite.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = AppConstants.Roles.Admin)]
+    [Authorize(Roles = AppConstants.Roles.Admin)]
     public class CoursesController : Controller
     {
         private readonly AppDbContext _context;
@@ -76,7 +76,7 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 if (String.IsNullOrEmpty(course.UrlName))
                 {
                     // leave all
-                    course.UrlName = FormatNameAsString(course.DisplayName);
+                    course.UrlName = course.DisplayName.ConvertToUrlName();
                     if (course.UrlName.Length < 4) // error if too small
                     {
                         ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
@@ -139,7 +139,7 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                     if (String.IsNullOrEmpty(course.UrlName))
                     {
                         // leave all
-                        course.UrlName = FormatNameAsString(course.DisplayName);
+                        course.UrlName = course.DisplayName.ConvertToUrlName();
                         if (course.UrlName.Length < 4) // error if too small
                         {
                             ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
@@ -239,6 +239,5 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
             }
         }
 
-        private string FormatNameAsString(string name) => Regex.Replace(name, @"[^\w\d-_]", "", RegexOptions.None, TimeSpan.FromSeconds(1.5));
     }
 }

@@ -7,30 +7,28 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LearnWebsite.Web.Data;
 using LearnWebsite.Web.Models.Entities;
-using Microsoft.AspNetCore.Authorization;
 using LearnWebsite.Web.Extensions;
 
-namespace LearnWebsite.Web.Areas.Admin.Controllers
+namespace LearnWebsite.Web.Areas.Admin.controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = AppConstants.Roles.Admin)]
-    public class PagesController : Controller
+    public class UnitsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public PagesController(AppDbContext context)
+        public UnitsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Pages
+        // GET: Admin/Units
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Pages.Include(c => c.Unit);
+            var appDbContext = _context.Units.Include(c => c.Course);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: Pages/Details/5
+        // GET: Admin/Units/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -38,63 +36,55 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var coursePage = await _context.Pages
-                .Include(c => c.Unit)
+            var courseUnit = await _context.Units
+                .Include(c => c.Course)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (coursePage == null)
+            if (courseUnit == null)
             {
                 return NotFound();
             }
 
-            return View(coursePage);
+            return View(courseUnit);
         }
 
-        // GET: Pages/Create
-        public async Task<IActionResult> Create(int? courseId, int? unitId)
+        // GET: Admin/Units/Create
+        public IActionResult Create(int? courseId)
         {
-            var c = await _context.Courses.ToListAsync();
-            ViewData["Courses"] = new SelectList(c, "Id", "DisplayName", courseId.HasValue ? courseId.Value : c.Min(co => co.Id));
-            // course specified 
-            if (courseId.HasValue)
-            {
-                ViewData["Units"] = new SelectList(_context.Units, "Id", "DisplayName", unitId.HasValue ? unitId.Value : _context.Units.Where(u => u.CourseId == courseId).Min(u => u.Id));
-            }
-            else
-            {
-                ViewData["Units"] = new SelectList(new List<int>()); // just send empty list
-            }
+            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "DisplayName", courseId);
             return View();
         }
 
-        // POST: Pages/Create
+        // POST: Admin/Units/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,HtmlContent,UnitId")] CoursePage coursePage)
+        public async Task<IActionResult> Create([Bind("Id,CourseId,DisplayName,UrlName")] CourseUnit courseUnit)
         {
             if (ModelState.IsValid)
             {
                 // url address
-                if (String.IsNullOrEmpty(coursePage.UrlName))
+                if (String.IsNullOrEmpty(courseUnit.UrlName))
                 {
                     // leave all
-                    coursePage.UrlName = coursePage.Title.ConvertToUrlName();
-                    if (coursePage.UrlName.Length < 4) // error if too small
+                    courseUnit.UrlName = courseUnit.DisplayName.ConvertToUrlName();
+                    if (courseUnit.UrlName.Length < 4) // error if too small
                     {
                         ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
-                        return View(coursePage);
+                        return View(courseUnit);
                     }
                 }
-                _context.Add(coursePage);
+                // put the unit as last in the course
+                courseUnit.InCourseOrder = await _context.Units.Where(u => u.CourseId == courseUnit.CourseId).MaxAsync(u => u.InCourseOrder) + 1;
+                _context.Add(courseUnit);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UnitId"] = new SelectList(_context.Courses, "Id", "DisplayName", coursePage.Unit.CourseId);
-            return View(coursePage);
+            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "DisplayName", courseUnit.CourseId);
+            return View(courseUnit);
         }
 
-        // GET: Pages/Edit/5
+        // GET: Admin/Units/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -102,23 +92,23 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var coursePage = await _context.Pages.FindAsync(id);
-            if (coursePage == null)
+            var courseUnit = await _context.Units.FindAsync(id);
+            if (courseUnit == null)
             {
                 return NotFound();
             }
-            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
-            return View(coursePage);
+            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Description", courseUnit.CourseId);
+            return View(courseUnit);
         }
 
-        // POST: Pages/Edit/5
+        // POST: Admin/Units/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,HtmlContent,UnitId")] CoursePage coursePage)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseId,DisplayName,InCourseOrder,UrlName")] CourseUnit courseUnit)
         {
-            if (id != coursePage.Id)
+            if (id != courseUnit.Id)
             {
                 return NotFound();
             }
@@ -128,22 +118,22 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 try
                 {
                     // url address
-                    if (String.IsNullOrEmpty(coursePage.UrlName))
+                    if (String.IsNullOrEmpty(courseUnit.UrlName))
                     {
                         // leave all
-                        coursePage.UrlName = coursePage.Title.ConvertToUrlName();
-                        if (coursePage.UrlName.Length < 4) // error if too small
+                        courseUnit.UrlName = courseUnit.DisplayName.ConvertToUrlName();
+                        if (courseUnit.UrlName.Length < 4) // error if too small
                         {
                             ModelState.AddModelError("UrlName", "Choose a url name which contains only numbers, digits, hyphen and underbar, or choose a course name with more english chars.");
-                            return View(coursePage);
+                            return View(courseUnit);
                         }
                     }
-                    _context.Update(coursePage);
+                    _context.Update(courseUnit);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CoursePageExists(coursePage.Id))
+                    if (!CourseUnitExists(courseUnit.Id))
                     {
                         return NotFound();
                     }
@@ -154,11 +144,11 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UnitId"] = new SelectList(_context.Units, "Id", "Id", coursePage.UnitId);
-            return View(coursePage);
+            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Description", courseUnit.CourseId);
+            return View(courseUnit);
         }
 
-        // GET: Pages/Delete/5
+        // GET: Admin/Units/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -166,31 +156,36 @@ namespace LearnWebsite.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var coursePage = await _context.Pages
-                .Include(c => c.Unit)
+            var courseUnit = await _context.Units
+                .Include(c => c.Course)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (coursePage == null)
+            if (courseUnit == null)
             {
                 return NotFound();
             }
 
-            return View(coursePage);
+            return View(courseUnit);
         }
 
-        // POST: Pages/Delete/5
+        // POST: Admin/Units/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var coursePage = await _context.Pages.FindAsync(id);
-            _context.Pages.Remove(coursePage);
+            var courseUnit = await _context.Units.FindAsync(id);
+            _context.Units.Remove(courseUnit);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CoursePageExists(int id)
+        private bool CourseUnitExists(int id)
         {
-            return _context.Pages.Any(e => e.Id == id);
+            return _context.Units.Any(e => e.Id == id);
+        }
+
+        public async Task<IActionResult> GetUnitsAsJson(int courseId)
+        {
+            return Json(await _context.Units.Where(u => u.CourseId == courseId).ToListAsync());
         }
     }
 }

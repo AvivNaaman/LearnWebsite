@@ -19,12 +19,19 @@
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group col-md-5">
-                <label class="control-label"></label>
-                <select class="form-control" asp-items="ViewBag.Courses" id="selectCourse"></select>
+                <label asp-for="UrlName" class="control-label"></label>
+                <input asp-for="UrlName" class="form-control" />
+                <span asp-validation-for="UrlName" class="text-danger"></span>
             </div>
             <div class="form-group col-md-5">
+                <label class="control-label"></label>
+                <select id="selectCourse" class="form-control" asp-items="ViewBag.Courses"></select>
+                <span class="text-danger"></span>
+            </div>
+            @* Unit selection, powered by ajax (see below in Scripts section). Items provided by query string if sent (see controller) *@
+            <div class="form-group col-md-5">
                 <label asp-for="UnitId" class="control-label"></label>
-                <select asp-for="UnitId" class="form-control" asp-items="ViewBag.UnitId"></select>
+                <select asp-for="UnitId" class="form-control" asp-items="ViewBag.Units"><option value="" selected disabled></option></select>
                 <span asp-validation-for="UnitId" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -56,6 +63,20 @@
             height: 600,
             image_caption: true,
             toolbar_mode: 'sliding',
+        });
+        @* On course selection, fetch units and put in unit selection: *@
+        $("#selectCourse").on('change', function (e) {
+            $.ajax('@Url.Action("GetUnitsAsJson", "Units", new { area = "Admin" })' + `?&courseId=${$('#selectCourse').find(':selected').val()}`, {})
+                .done(function (data) {
+                    console.log(data);
+                    $.each(data, function (i, val) {
+                        log(val);
+                        $("#selectUnit").append($('<option/>', {
+                            value: val.id,
+                            text: val.displayName
+                        }));
+                    });
+                })
         });
     </script>
 }

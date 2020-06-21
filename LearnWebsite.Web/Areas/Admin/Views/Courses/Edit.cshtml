@@ -6,12 +6,15 @@
 }
 <h4>Course</h4>
 <hr />
+<p class="text-muted">Click save after every change you'd like to save.</p>
 <form asp-action="Edit" enctype="multipart/form-data" onsubmit="editFormSubmitted">
     <div class="row">
-        <div class="col-md-4 col-12">
+        <div class="col-lg-4 col-12">
             <h5>Edit Course Details</h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Prevent data loss using hidden fields *@
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ImageSrc" />
             <div class="form-group">
                 <label asp-for="DisplayName" class="control-label"></label>
                 <input asp-for="DisplayName" class="form-control" />
@@ -33,11 +36,8 @@
                 <input asp-for="UrlName" class="form-control" />
                 <span asp-validation-for="UrlName" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="button" id="saveButton" value="Save" class="btn btn-primary" onclick="saveButtonClick" />
-            </div>
         </div>
-        <div class="col-md-8 col-12">
+        <div class="col-lg-8 col-12">
             <h5>Edit Units & Pages</h5>
             <h6 class="text-muted">Drag and drop to reorder, for both outer order of units and inner order of pages.</h6>
             <div>
@@ -61,11 +61,24 @@
                             <div class="card w-100">
                                 @* Single card's header *@
                                 <div class="card-header" id="heading-@unit.Id">
-                                    <h5 class="mb-0">
+                                    <h5 class="mb-0 clearfix">
                                         @* Make sure no submission is accidentally done! *@
                                         <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse-@unit.Id" aria-expanded="true" aria-controls="collapse-@unit.Id">
                                             @unit.DisplayName
                                         </button>
+                                        <span class="float-right p-1">
+                                            <a asp-area="Admin" asp-controller="Units" asp-action="Edit" asp-route-id="@unit.Id" title="Edit Unit" class="text-primary text-decoration-none">
+                                                <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                </svg>
+                                            </a>
+                                            <a asp-area="Admin" asp-controller="Units" asp-action="Delete" asp-route-id="@unit.Id" title="Remove Unit" class="text-danger text-decoration-none">
+                                                <svg class="bi bi-trash-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z" />
+                                                </svg>
+                                            </a>
+                                        </span>
                                     </h5>
                                 </div>
                                 @* Unit's pages *@
@@ -76,7 +89,7 @@
                                         {
                                             <h6 class="text-muted">
                                                 Seems like there are no pages in this unit.
-                                                <a asp-area="admin" asp-controller="units" asp-action="create" asp-route-course="@Model.Id" asp-route-unit="@unit.Id">
+                                                <a asp-area="Admin" asp-controller="Units" asp-action="Create" asp-route-course="@Model.Id" asp-route-unit="@unit.Id">
                                                     Create some content
                                                 </a>
                                                 one
@@ -90,26 +103,46 @@
                                                     <li class="list-group-item clearfix list-group-item-action">
                                                         @pg.Title
                                                         <div class="float-right">
-                                                            <a asp-area="admin" asp-controller="pages" asp-action="edit" asp-route-id="@pg.Id" title="Edit Page">
-                                                                <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                                                </svg>
-                                                            </a>
-                                                            <a asp-area="admin" asp-controller="pages" asp-action="delete" asp-route-id="@pg.Id" title="Remove Page">
-                                                                <svg class="bi bi-trash-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z" />
-                                                                </svg>
-                                                            </a>
+                                                            <div class="float-right">
+                                                                <a asp-area="Admin" asp-controller="Pages" asp-action="Edit" asp-route-id="@pg.Id" title="Edit Page" class="text-primary text-decoration-none">
+                                                                    <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                                    </svg>
+                                                                </a>
+                                                                <a asp-area="Admin" asp-controller="Pages" asp-action="Delete" asp-route-id="@pg.Id" title="Remove Page" class="text-danger text-decoration-none">
+                                                                    <svg class="bi bi-trash-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd" d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z" />
+                                                                    </svg>
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </li>
                                                 }
                                             </ol>
+                                            <div>
+                                                <a asp-area="Admin" asp-action="Create" asp-controller="Pages" asp-route-courseId="@unit.CourseId" asp-route-unitId="@unit.Id" class="btn btn-sm btn-light m-2">
+                                                    <svg class="bi bi-plus-square-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z" />
+                                                    </svg>
+                                                    Create a page in this unit
+                                                </a>
+                                            </div>
                                         }
                                     </div>
                                 </div>
                             </div>
+                            isFirst = false;
                         }
+
+                        <div>
+                            <a asp-area="Admin" asp-action="Create" asp-controller="Units" asp-route-courseId="@Model.Id" class="btn btn-light m-2">
+                                <svg class="bi bi-plus-square-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z" />
+                                </svg>
+                                Add a unit to this course
+                            </a>
+                        </div>
                     }
                 </div>
             </div>
@@ -117,6 +150,10 @@
     </div>
     @* This input will contain a seriallization of the pages and units ids, and will be posted to the server, where it will be desiriallized and validated. *@
     <input type="hidden" name="UnitsPagesOrder" id="UnitsPagesOrder" />
+
+    <div class="form-group p-3">
+        <input type="button" id="saveButton" value="Save" class="btn btn-lg btn-primary float-right" onclick="saveButtonClick" />
+    </div>
 </form>
 
 <div>
@@ -171,18 +208,23 @@
         }
         @foreach (var unit in Model.Units)
         {
+            @* Build unit sub array for storing page order *@
             <text>
         var currUnitPagesArray@(unit.Id) = [];</text>
-            foreach (var page in unit.Pages)
-            {
+                foreach (var page in unit.Pages)
+                {
                 <text>
         currUnitPagesArray@(unit.Id).push(@(page.Id));
 
         </text>
-            }
+                }
             <text>
         // add to main array id of unit + array of values
         orderArray.push({ id: @(unit.Id), values: currUnitPagesArray@(unit.Id)});
+        </text>
+        @* enable Sortable for inner list (of pages in current unit) and add change event handlers *@
+        if (unit.Pages.Count > 0) {
+            <text>
             Sortable.create(editlistgroup@(unit.Id), {
                 animation: 100,
                 group: 'unit@(unit.Id)pageslist',
@@ -191,7 +233,8 @@
                 chosenClass: 'active',
                 onEnd: function (e) { pageOrderChanged(e, currUnitPagesArray@(unit.Id));}
             });
-    </text>
+        </text>
+        }
         }
 
         function editFormSubmitted(e) {
@@ -207,7 +250,8 @@
         }
 
         // submit form, witout asking user ahether its OK to leave page
-        $('#saveButton').click(function () {
+        $('#saveButton').on('click', function () {
+            console.log("submitting...");
             setPreventLeavingState(false);
             document.forms[0].submit();
         });
